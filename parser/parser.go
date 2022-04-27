@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/binary"
 	"io"
 	"os"
 )
@@ -47,4 +48,22 @@ func (p *BaseParser) readString(num int64) string {
 		return ""
 	}
 	return bytes2string(bytes)
+}
+
+func (p *BaseParser) readUint32() (uint32, error) {
+	bytes, err := p.read(4)
+	if err != nil {
+		return 0, err
+	}
+	val := binary.LittleEndian.Uint32(bytes)
+	return val, err
+}
+
+func (p *BaseParser) readUint16() (uint16, error) {
+	bytes, err := p.read(2)
+	if err != nil {
+		return 0, err
+	}
+	val := binary.LittleEndian.Uint16(bytes)
+	return val, err
 }

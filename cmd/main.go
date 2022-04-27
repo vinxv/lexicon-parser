@@ -22,6 +22,8 @@ func guessKind(filename string) string {
 		return "baidu"
 	case ".qcel":
 		return "sogou"
+	case ".bin":
+		return "sogou-bin"
 	}
 	return ""
 }
@@ -51,6 +53,8 @@ func main() {
 		p = parser.NewBaiduParser()
 	case "sogou":
 		p = new(parser.SogouParser)
+	case "sogou-bin":
+		p = new(parser.SogouBinParser)
 	case "qq":
 		p = new(parser.QQParser)
 	default:
