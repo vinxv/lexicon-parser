@@ -15,3 +15,11 @@ func bytes2string(bytes []byte) string {
 	runes := utf16.Decode(vals)
 	return string(runes)
 }
+
+func bytesUint16(bytes []byte) uint16 {
+	return binary.LittleEndian.Uint16(bytes)
+}
+
+func byte2Uint32(bytes []byte) uint32 {
+	return binary.LittleEndian.Uint32(bytes)
+}

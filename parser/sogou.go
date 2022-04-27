@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"encoding/binary"
 	"log"
 	"os"
 	"strings"
@@ -27,15 +26,6 @@ type SogouParser struct {
 	BaseParser
 }
 
-func (p *SogouParser) byte2int(bytes []byte) int {
-	return int(binary.LittleEndian.Uint16(bytes))
-}
-
-func (p *SogouParser) readeInt() int {
-	bytes, _ := p.read(2)
-	return int(binary.LittleEndian.Uint16(bytes))
-}
-
 func (p *SogouParser) parseMetaInfo() metaInfo {
 	meta := metaInfo{}
 	meta.title = p.readString(sg_titleend - p.pos)
@@ -47,15 +37,15 @@ func (p *SogouParser) parseMetaInfo() metaInfo {
 
 func (p *SogouParser) parsePinyinTable() []string {
 
-	total := p.readeInt()
+	total, _ := p.readUint16()
 	pinyinTable := make([]string, total)
 
 	p.read(2)
 
-	for i := 0; i < total; i++ {
+	for i := 0; i < int(total); i++ {
 
-		index := p.readeInt()
-		length := p.readeInt()
+		index, _ := p.readUint16()
+		length, _ := p.readUint16()
 
 		pinyin := p.readString(int64(length))
 		pinyinTable[index] = pinyin
@@ -66,8 +56,8 @@ func (p *SogouParser) parsePinyinTable() []string {
 
 func (p *SogouParser) parseWord(pinyinTable []string) ([]Result, error) {
 
-	sameNum := p.readeInt()
-	tableLen := p.readeInt()
+	sameNum, _ := p.readUint16()
+	tableLen, _ := p.readUint16()
 
 	pinyinChars := make([]string, tableLen)
 	pinyinIndexByte, err := p.read(int64(tableLen))
@@ -75,9 +65,9 @@ func (p *SogouParser) parseWord(pinyinTable []string) ([]Result, error) {
 		return nil, err
 	}
 
-	for i := 0; i < tableLen/2; i++ {
+	for i := 0; i < int(tableLen/2); i++ {
 		indexByte := pinyinIndexByte[2*i : 2*i+2]
-		index := p.byte2int(indexByte)
+		index := bytesUint16(indexByte)
 		pinyinChars[i] = pinyinTable[index]
 	}
 
@@ -85,21 +75,19 @@ func (p *SogouParser) parseWord(pinyinTable []string) ([]Result, error) {
 	pinyin = strings.Trim(pinyin, "'")
 
 	wordItems := make([]Result, sameNum)
-	for i := 0; i < sameNum; i++ {
+	for i := 0; i < int(sameNum); i++ {
 
-		wordLen := p.readeInt()
+		wordLen, _ := p.readUint16()
 		word := p.readString(int64(wordLen))
 
-		extLen := p.readeInt()
-		_ = extLen
-
+		extLen, _ := p.readUint16()
 		extBytes, err := p.read(int64(extLen))
 		if err != nil {
 			return nil, err
 		}
 		countBytes := extBytes[:2]
-		count := p.byte2int(countBytes)
-		wordItems[i] = Result{word, pinyin, count}
+		count := bytesUint16(countBytes)
+		wordItems[i] = Result{word, pinyin, int(count)}
 	}
 	return wordItems, nil
 }
