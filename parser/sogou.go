@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/binary"
+	"log"
 	"os"
 	"strings"
 )
@@ -111,9 +112,10 @@ func (p *SogouParser) Parse(reader *os.File) ([]Result, error) {
 	}
 	p.size = size.Size()
 
+	p.seek(sg_titlestart)
+
 	meta := p.parseMetaInfo()
-	_ = meta
-	// log.Printf("metainfo\ntitle: %s\ncategoty:%s\ndescription:%s\nsample:%v\n\n", meta.title, meta.category, meta.desc, meta.sample)
+	log.Printf("metainfo\ntitle: %s\ncategoty:%s\ndescription:%s\nsample:%v\n\n", meta.title, meta.category, meta.desc, meta.sample)
 
 	pinyinTable := p.parsePinyinTable()
 	words := []Result{}
